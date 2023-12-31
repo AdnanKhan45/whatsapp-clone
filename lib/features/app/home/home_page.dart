@@ -9,7 +9,8 @@ import 'package:whatsapp_clone_app/features/chat/presentation/pages/chat_page.da
 import 'package:whatsapp_clone_app/features/status/presentation/pages/status_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String uid;
+  const HomePage({super.key, required this.uid});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -79,7 +80,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     child: GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(
-                              context, PageConst.settingsPage,);
+                              context, PageConst.settingsPage, arguments: widget.uid);
                         },
                         child: const Text('Settings')),
                   ),
