@@ -10,6 +10,8 @@ import 'package:whatsapp_clone_app/features/user/domain/usecases/credential/sign
 import 'package:whatsapp_clone_app/features/user/domain/usecases/credential/verify_phone_number_usecsae.dart';
 import 'package:whatsapp_clone_app/features/user/domain/usecases/user/create_user_usecase.dart';
 import 'package:whatsapp_clone_app/features/user/domain/usecases/user/get_all_users_usecase.dart';
+import 'package:whatsapp_clone_app/features/user/domain/usecases/user/get_device_number_usecase.dart';
+import 'package:whatsapp_clone_app/features/user/domain/usecases/user/get_device_number_usecase.dart';
 import 'package:whatsapp_clone_app/features/user/domain/usecases/user/get_single_user_usecase.dart';
 import 'package:whatsapp_clone_app/features/user/domain/usecases/user/update_user_usecase.dart';
 import 'package:whatsapp_clone_app/features/user/presentation/cubit/auth/auth_cubit.dart';
@@ -75,6 +77,9 @@ Future<void> userInjectionContainer() async {
 
   sl.registerLazySingleton<VerifyPhoneNumberUseCase>(
           () => VerifyPhoneNumberUseCase(repository: sl.call()));
+
+  sl.registerLazySingleton<GetDeviceNumberUseCase>(
+          () => GetDeviceNumberUseCase(repository: sl.call()));
 
   // * REPOSITORY & DATA SOURCES INJECTION
 

@@ -37,6 +37,7 @@ dependencies:
   fluttertoast: 8.2.2
   intl: 0.18.1
   contacts_service: ^0.6.3
+  flutter_contacts: ^1.1.7+1
   image_picker: 1.0.4
   file_picker: ^5.2.11
   video_player: ^2.2.10

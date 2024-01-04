@@ -11,9 +11,9 @@
 	<key>BUNDLE_ID</key>
 	<string>com.example.whatsappCloneApp</string>
 	<key>PROJECT_ID</key>
-	<string>whatsapp-clone-app-f6625</string>
+	<string>whatsapp_clone-app-f6625</string>
 	<key>STORAGE_BUCKET</key>
-	<string>whatsapp-clone-app-f6625.appspot.com</string>
+	<string>whatsapp_clone-app-f6625.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>

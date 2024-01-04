@@ -53,16 +53,16 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyCC-WaQ_DGVFtAPIYVl5Auba0zz8WLY54s',
     appId: '1:1052212102511:android:09f10b12a09735d6bed49a',
     messagingSenderId: '1052212102511',
-    projectId: 'whatsapp-clone-app-f6625',
-    storageBucket: 'whatsapp-clone-app-f6625.appspot.com',
+    projectId: 'whatsapp_clone-app-f6625',
+    storageBucket: 'whatsapp_clone-app-f6625.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDD_1OUgjSXi69qNlIFvJfW__SnjrcP_oI',
     appId: '1:1052212102511:ios:0b9ab46ec460adf5bed49a',
     messagingSenderId: '1052212102511',
-    projectId: 'whatsapp-clone-app-f6625',
-    storageBucket: 'whatsapp-clone-app-f6625.appspot.com',
+    projectId: 'whatsapp_clone-app-f6625',
+    storageBucket: 'whatsapp_clone-app-f6625.appspot.com',
     iosBundleId: 'com.example.whatsappCloneApp',
   );
 }
