@@ -125,10 +125,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       body: TabBarView(
         controller: _tabController,
 
-        children: const [
-          ChatPage(),
-          StatusPage(),
-          CallsHistoryPage(),
+        children: [
+          ChatPage(uid: widget.uid),
+          const StatusPage(),
+          const CallsHistoryPage(),
         ],
       ),
     );
@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             backgroundColor: tabColor,
             onPressed: () {
              // Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactsPage()));
-              Navigator.pushNamed(context, PageConst.contactUsersPage);
+              Navigator.pushNamed(context, PageConst.contactUsersPage, arguments: widget.uid);
             },
             child: const Icon(
               Icons.message,

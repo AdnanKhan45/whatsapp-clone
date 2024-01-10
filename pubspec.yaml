@@ -58,9 +58,9 @@ dependencies:
   swipe_to: ^1.0.2
   emoji_picker_flutter: ^1.5.4
 
-  #giphy_picker: ^3.0.1
+  giphy_picker: ^3.0.1
   #enough_giphy: ^0.2.0
-  enough_giphy_flutter: ^0.4.0
+  #enough_giphy_flutter: ^0.4.0
   flutter_sound: ^9.2.13
   path_provider: ^2.0.14
   audioplayers: 5.1.0
