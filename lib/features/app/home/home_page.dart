@@ -1,12 +1,15 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp_clone_app/features/app/const/page_const.dart';
 import 'package:whatsapp_clone_app/features/app/home/contacts_page.dart';
 import 'package:whatsapp_clone_app/features/app/theme/style.dart';
 import 'package:whatsapp_clone_app/features/call/presentation/pages/calls_history_page.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/pages/chat_page.dart';
 import 'package:whatsapp_clone_app/features/status/presentation/pages/status_page.dart';
+import 'package:whatsapp_clone_app/features/user/domain/entities/user_entity.dart';
+import 'package:whatsapp_clone_app/features/user/presentation/cubit/user/user_cubit.dart';
 
 class HomePage extends StatefulWidget {
   final String uid;
@@ -16,13 +19,14 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
 
   TabController? _tabController;
   int _currentTabIndex = 0;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 3, vsync: this);
 
     _tabController!.addListener(() {
@@ -35,8 +39,37 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        BlocProvider.of<UserCubit>(context).updateUser(
+            user: UserEntity(
+                uid: widget.uid,
+                isOnline: true
+            )
+        );
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.paused:
+        BlocProvider.of<UserCubit>(context).updateUser(
+            user: UserEntity(
+                uid: widget.uid,
+                isOnline: false
+            )
+        );
+        break;
+      case AppLifecycleState.hidden:
+      // TODO: Handle this case.
+        break;
+    }
   }
 
   @override

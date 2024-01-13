@@ -12,13 +12,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     Timer(const Duration(seconds: 2), () {
-      Navigator.pushAndRemoveUntil(
+      if(mounted) {
+        Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => const WelcomePage(),
         ),
             (route) => false,
       );
+      }
     });
     super.initState();
   }

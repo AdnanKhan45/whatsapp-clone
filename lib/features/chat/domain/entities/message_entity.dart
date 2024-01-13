@@ -18,6 +18,7 @@ class MessageEntity extends Equatable {
   final String? senderProfile;
   final String? recipientProfile;
   final String? messageId;
+  final String? uid;
 
   MessageEntity(
       {
@@ -35,6 +36,7 @@ class MessageEntity extends Equatable {
         this.messageId,
         this.senderProfile,
         this.recipientProfile,
+        this.uid
       });
 
 
@@ -55,6 +57,7 @@ class MessageEntity extends Equatable {
     messageId,
     senderProfile,
     recipientProfile,
+    uid,
   ];
 
 }
