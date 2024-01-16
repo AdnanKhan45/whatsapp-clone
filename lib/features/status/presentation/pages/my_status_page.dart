@@ -1,8 +1,8 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:get_time_ago/get_time_ago.dart';
 import 'package:whatsapp_clone_app/features/app/global/widgets/profile_widget.dart';
-import 'package:timeago/timeago.dart' as time_ago;
 import 'package:whatsapp_clone_app/features/app/theme/style.dart';
 
 class MyStatusPage extends StatefulWidget {
@@ -39,7 +39,7 @@ class _MyStatusPageState extends State<MyStatusPage> {
                 const SizedBox(width: 15,),
                 Expanded(
                   child: Text(
-                    time_ago.format(DateTime.now().subtract(Duration(seconds: DateTime.now().second))),
+                    GetTimeAgo.parse(DateTime.now().subtract(Duration(seconds: DateTime.now().second))),
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                 ),
