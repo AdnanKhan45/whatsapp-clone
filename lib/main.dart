@@ -6,6 +6,8 @@ import 'package:whatsapp_clone_app/features/app/splash/splash_screen.dart';
 import 'package:whatsapp_clone_app/features/app/theme/style.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/cubit/chat/chat_cubit.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/cubit/message/message_cubit.dart';
+import 'package:whatsapp_clone_app/features/status/presentation/cubit/get_my_status/get_my_status_cubit.dart';
+import 'package:whatsapp_clone_app/features/status/presentation/cubit/status/status_cubit.dart';
 import 'package:whatsapp_clone_app/features/user/presentation/cubit/auth/auth_cubit.dart';
 import 'package:whatsapp_clone_app/features/user/presentation/cubit/credential/credential_cubit.dart';
 import 'package:whatsapp_clone_app/features/user/presentation/cubit/get_device_number/get_device_number_cubit.dart';
@@ -51,6 +53,12 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => di.sl<MessageCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<StatusCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<GetMyStatusCubit>(),
         ),
       ],
       child: MaterialApp(
