@@ -170,12 +170,16 @@ class StatusRemoteDataSourceImpl implements StatusRemoteDataSource {
         // check if the existing status is still within its 24 hours period
         if (createdAt.isAfter(DateTime.now().subtract(const Duration(hours: 24)))) {
           // if it is, update the existing status with the new stores (images, or videos)
-          final updatedStories = List<StatusImageEntity>.from(existingStatusData['stories'])
-            ..addAll(status.stories!);
+
+          final stories = List<Map<String, dynamic>>.from(statusDocRef.get('stories'));
+
+          stories.addAll(status.stories!.map((e) => StatusImageEntity.toJsonStatic(e)));
+          // final updatedStories = List<StatusImageEntity>.from(existingStatusData['stories'])
+          //   ..addAll(status.stories!);
 
           await statusCollection.doc(status.statusId).update({
-            'stories': updatedStories,
-            'imageUrl': updatedStories[0].url
+            'stories': stories,
+            'imageUrl': stories[0]['url']
           });
           return;
         }
@@ -183,7 +187,7 @@ class StatusRemoteDataSourceImpl implements StatusRemoteDataSource {
         return;
       }
     } catch (e) {
-      print("Some error occur while creating status");
+      print("Some error occur while updating status stories");
     }
   }
 
