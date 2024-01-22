@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp_clone_app/features/app/home/home_page.dart';
 import 'package:whatsapp_clone_app/features/app/splash/splash_screen.dart';
 import 'package:whatsapp_clone_app/features/app/theme/style.dart';
+import 'package:whatsapp_clone_app/features/call/presentation/cubits/agora/agora_cubit.dart';
+import 'package:whatsapp_clone_app/features/call/presentation/cubits/call/call_cubit.dart';
+import 'package:whatsapp_clone_app/features/call/presentation/cubits/my_call_history/my_call_history_cubit.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/cubit/chat/chat_cubit.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/cubit/message/message_cubit.dart';
 import 'package:whatsapp_clone_app/features/status/presentation/cubit/get_my_status/get_my_status_cubit.dart';
@@ -59,6 +62,15 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => di.sl<GetMyStatusCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<CallCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<MyCallHistoryCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => di.sl<AgoraCubit>(),
         ),
       ],
       child: MaterialApp(

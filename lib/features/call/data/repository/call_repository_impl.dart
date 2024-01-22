@@ -27,4 +27,6 @@ class CallRepositoryImpl implements CallRepository {
   @override
   Future<void> saveCallHistory(CallEntity call) async => remoteDataSource.saveCallHistory(call);
 
+  @override
+  Future<void> updateCallHistoryStatus(CallEntity call) async => remoteDataSource.updateCallHistoryStatus(call);
 }

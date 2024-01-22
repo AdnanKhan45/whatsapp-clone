@@ -15,6 +15,8 @@ import 'package:whatsapp_clone_app/features/app/global/widgets/dialog_widget.dar
 import 'package:whatsapp_clone_app/features/app/global/widgets/show_image_picked_widget.dart';
 import 'package:whatsapp_clone_app/features/app/global/widgets/show_video_picked_widget.dart';
 import 'package:whatsapp_clone_app/features/app/theme/style.dart';
+import 'package:whatsapp_clone_app/features/call/domain/entities/call_entity.dart';
+import 'package:whatsapp_clone_app/features/call/presentation/pages/pick_up_call_page.dart';
 import 'package:whatsapp_clone_app/features/chat/domain/entities/message_entity.dart';
 import 'package:whatsapp_clone_app/features/chat/domain/entities/message_reply_entity.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/cubit/message/message_cubit.dart';
@@ -177,534 +179,549 @@ class _SingleChatPageState extends State<SingleChatPage> {
 
     bool _isReplying = provider.messageReplay.message != null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          children: [
-            Text('${widget.message.recipientName}'),
-            BlocBuilder<GetSingleUserCubit, GetSingleUserState>(
-                builder: (context, state) {
-                  if(state is GetSingleUserLoaded) {
-                    return state.singleUser.isOnline == true ? const Text(
-                      "Online",
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
-                    ) : Container();
-                  }
+    return PickUpCallPage(
+      uid: widget.message.senderUid,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Column(
+            children: [
+              Text('${widget.message.recipientName}'),
+              BlocBuilder<GetSingleUserCubit, GetSingleUserState>(
+                  builder: (context, state) {
+                    if(state is GetSingleUserLoaded) {
+                      return state.singleUser.isOnline == true ? const Text(
+                        "Online",
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
+                      ) : Container();
+                    }
 
-                  return Container();
-                }
+                    return Container();
+                  }
+              ),
+            ],
+          ),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                ChatUtils.makeCall(context, callEntity: CallEntity(
+                  callerId: widget.message.senderUid,
+                  callerName: widget.message.senderName,
+                  callerProfileUrl: widget.message.senderProfile,
+                  receiverId: widget.message.recipientUid,
+                  receiverName: widget.message.recipientName,
+                  receiverProfileUrl: widget.message.recipientProfile,
+                ));
+              },
+              child: const Icon(
+                Icons.videocam_rounded,
+                size: 25,
+              ),
+            ),
+            const SizedBox(
+              width: 25,
+            ),
+            const Icon(
+              Icons.call,
+              size: 22,
+            ),
+            const SizedBox(
+              width: 25,
+            ),
+            const Icon(
+              Icons.more_vert,
+              size: 22,
+            ),
+            const SizedBox(
+              width: 15,
             ),
           ],
         ),
-        actions: const [
-          Icon(
-            Icons.videocam_rounded,
-            size: 25,
-          ),
-          SizedBox(
-            width: 25,
-          ),
-          Icon(
-            Icons.call,
-            size: 22,
-          ),
-          SizedBox(
-            width: 25,
-          ),
-          Icon(
-            Icons.more_vert,
-            size: 22,
-          ),
-          SizedBox(
-            width: 15,
-          ),
-        ],
-      ),
-      body: BlocBuilder<MessageCubit, MessageState>(
-        builder: (context, state) {
-          if (state is MessageLoaded) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _scrollToBottom();
-            });
-            final messages = state.messages;
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isShowAttachWindow = false;
-                });
-              },
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    top: 0,
-                    child: Image.asset("assets/whatsapp_bg_image.png", fit: BoxFit.cover),
-                  ),
-                  Column(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final message= messages[index];
+        body: BlocBuilder<MessageCubit, MessageState>(
+          builder: (context, state) {
+            if (state is MessageLoaded) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _scrollToBottom();
+              });
+              final messages = state.messages;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isShowAttachWindow = false;
+                  });
+                },
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      top: 0,
+                      child: Image.asset("assets/whatsapp_bg_image.png", fit: BoxFit.cover),
+                    ),
+                    Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) {
+                              final message= messages[index];
 
-                            if(message.isSeen == false  && message.recipientUid == widget.message.uid) {
-                              provider.seenMessage(message: MessageEntity(
-                                  senderUid: widget.message.senderUid,
-                                  recipientUid: widget.message.recipientUid,
-                                  messageId: message.messageId
-                              ));
-                            }
+                              if(message.isSeen == false  && message.recipientUid == widget.message.uid) {
+                                provider.seenMessage(message: MessageEntity(
+                                    senderUid: widget.message.senderUid,
+                                    recipientUid: widget.message.recipientUid,
+                                    messageId: message.messageId
+                                ));
+                              }
 
-                            if(message.senderUid == widget.message.senderUid) {
-                              return _messageLayout(
-                                messageType: message.messageType,
-                                message: message.message,
-                                alignment: Alignment.centerRight,
-                                createAt: message.createdAt,
-                                isSeen: message.isSeen,
-                                isShowTick: true,
-                                messageBgColor: messageColor,
-                                rightPadding: message.repliedMessage == "" ? 85 : 5,
-                                reply: MessageReplayEntity(
-                                    message: message.repliedMessage,
-                                    messageType: message.repliedMessageType,
-                                    username: message.repliedTo
-                                ),
-                                onLongPress: () {
-                                  focusNode.unfocus();
-                                  displayAlertDialog(
-                                      context,
-                                      onTap: () {
-                                        BlocProvider.of<MessageCubit>(context).deleteMessage(message: MessageEntity(
-                                            senderUid: widget.message.senderUid,
-                                            recipientUid: widget.message.recipientUid,
-                                            messageId: message.messageId
-                                        ));
-                                        Navigator.pop(context);
-                                      },
-                                      confirmTitle: "Delete",
-                                      content: "Are you sure you want to delete this message?"
-                                  );
-                                },
-                                onSwipe: () {
-                                  onMessageSwipe(
-                                      message: message.message,
-                                      username: message.senderName,
-                                      type: message.messageType,
-                                      isMe: true
-                                  );
+                              if(message.senderUid == widget.message.senderUid) {
+                                return _messageLayout(
+                                  messageType: message.messageType,
+                                  message: message.message,
+                                  alignment: Alignment.centerRight,
+                                  createAt: message.createdAt,
+                                  isSeen: message.isSeen,
+                                  isShowTick: true,
+                                  messageBgColor: messageColor,
+                                  rightPadding: message.repliedMessage == "" ? 85 : 5,
+                                  reply: MessageReplayEntity(
+                                      message: message.repliedMessage,
+                                      messageType: message.repliedMessageType,
+                                      username: message.repliedTo
+                                  ),
+                                  onLongPress: () {
+                                    focusNode.unfocus();
+                                    displayAlertDialog(
+                                        context,
+                                        onTap: () {
+                                          BlocProvider.of<MessageCubit>(context).deleteMessage(message: MessageEntity(
+                                              senderUid: widget.message.senderUid,
+                                              recipientUid: widget.message.recipientUid,
+                                              messageId: message.messageId
+                                          ));
+                                          Navigator.pop(context);
+                                        },
+                                        confirmTitle: "Delete",
+                                        content: "Are you sure you want to delete this message?"
+                                    );
+                                  },
+                                  onSwipe: () {
+                                    onMessageSwipe(
+                                        message: message.message,
+                                        username: message.senderName,
+                                        type: message.messageType,
+                                        isMe: true
+                                    );
 
-                                  setState(() {});
-                                },
-                              );
-                            } else {
-                              return _messageLayout(
-                                messageType: message.messageType,
-                                message: message.message,
-                                alignment: Alignment.centerLeft,
-                                createAt: message.createdAt,
-                                isSeen:  message.isSeen,
-                                isShowTick: false,
-                                messageBgColor: senderMessageColor,
-                                rightPadding: message.repliedMessage == "" ? 85 : 5,
-                                reply: MessageReplayEntity(
-                                    message: message.repliedMessage,
-                                    messageType: message.repliedMessageType,
-                                    username: message.repliedTo
-                                ),
-                                onLongPress: () {
-                                  focusNode.unfocus();
-                                  displayAlertDialog(
-                                      context,
-                                      onTap: () {
-                                        BlocProvider.of<MessageCubit>(context).deleteMessage(message: MessageEntity(
-                                            senderUid: widget.message.senderUid,
-                                            recipientUid: widget.message.recipientUid,
-                                            messageId: message.messageId
-                                        ));
-                                        Navigator.pop(context);
-                                      },
-                                      confirmTitle: "Delete",
-                                      content: "Are you sure you want to delete this message?"
-                                  );
-                                },
-                                onSwipe: () {
-                                  onMessageSwipe(
-                                      message: message.message,
-                                      username: message.senderName,
-                                      type: message.messageType,
-                                      isMe: false
-                                  );
+                                    setState(() {});
+                                  },
+                                );
+                              } else {
+                                return _messageLayout(
+                                  messageType: message.messageType,
+                                  message: message.message,
+                                  alignment: Alignment.centerLeft,
+                                  createAt: message.createdAt,
+                                  isSeen:  message.isSeen,
+                                  isShowTick: false,
+                                  messageBgColor: senderMessageColor,
+                                  rightPadding: message.repliedMessage == "" ? 85 : 5,
+                                  reply: MessageReplayEntity(
+                                      message: message.repliedMessage,
+                                      messageType: message.repliedMessageType,
+                                      username: message.repliedTo
+                                  ),
+                                  onLongPress: () {
+                                    focusNode.unfocus();
+                                    displayAlertDialog(
+                                        context,
+                                        onTap: () {
+                                          BlocProvider.of<MessageCubit>(context).deleteMessage(message: MessageEntity(
+                                              senderUid: widget.message.senderUid,
+                                              recipientUid: widget.message.recipientUid,
+                                              messageId: message.messageId
+                                          ));
+                                          Navigator.pop(context);
+                                        },
+                                        confirmTitle: "Delete",
+                                        content: "Are you sure you want to delete this message?"
+                                    );
+                                  },
+                                  onSwipe: () {
+                                    onMessageSwipe(
+                                        message: message.message,
+                                        username: message.senderName,
+                                        type: message.messageType,
+                                        isMe: false
+                                    );
 
-                                  setState(() {});
-                                },
-                              );
-                            }
-                          },
+                                    setState(() {});
+                                  },
+                                );
+                              }
+                            },
+                          ),
                         ),
-                      ),
 
 
 
-                      _isReplying == true
-                          ? const SizedBox(
-                        height: 5,
-                      )
-                          : const SizedBox(
-                        height: 0,
-                      ),
+                        _isReplying == true
+                            ? const SizedBox(
+                          height: 5,
+                        )
+                            : const SizedBox(
+                          height: 0,
+                        ),
 
-                      _isReplying == true
-                          ? Row(
-                        children: [
-                          Expanded(
-                            child: MessageReplayPreviewWidget(
-                              onCancelReplayListener: () {
-                                provider.setMessageReplay =
-                                    MessageReplayEntity();
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                          Container(
-                            width: 60,
-                          ),
-                        ],
-                      )
-                          : Container(),
-
-                      Container(
-                        margin: EdgeInsets.only(left: 10, right: 10, top: _isReplying == true ? 0 : 5, bottom: 5),
-                        child: Row(
+                        _isReplying == true
+                            ? Row(
                           children: [
                             Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5),
-                                decoration: BoxDecoration(color: appBarColor, borderRadius: _isReplying == true
-                                    ? const BorderRadius.only(
-                                    bottomLeft: Radius.circular(25),
-                                    bottomRight:
-                                    Radius.circular(25))
-                                    : BorderRadius.circular(25)),
-                                height: 50,
-                                child: TextField(
-                                  focusNode: focusNode,
-                                  onTap: () {
-                                    setState(() {
-                                      _isShowAttachWindow = false;
-                                      isShowEmojiKeyboard = false;
-                                    });
-                                  },
-                                  controller: _textMessageController,
-                                  onChanged: (value) {
-                                    if (value.isNotEmpty) {
+                              child: MessageReplayPreviewWidget(
+                                onCancelReplayListener: () {
+                                  provider.setMessageReplay =
+                                      MessageReplayEntity();
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: 60,
+                            ),
+                          ],
+                        )
+                            : Container(),
+
+                        Container(
+                          margin: EdgeInsets.only(left: 10, right: 10, top: _isReplying == true ? 0 : 5, bottom: 5),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                                  decoration: BoxDecoration(color: appBarColor, borderRadius: _isReplying == true
+                                      ? const BorderRadius.only(
+                                      bottomLeft: Radius.circular(25),
+                                      bottomRight:
+                                      Radius.circular(25))
+                                      : BorderRadius.circular(25)),
+                                  height: 50,
+                                  child: TextField(
+                                    focusNode: focusNode,
+                                    onTap: () {
                                       setState(() {
-                                        _textMessageController.text = value;
-                                        _isDisplaySendButton = true;
+                                        _isShowAttachWindow = false;
+                                        isShowEmojiKeyboard = false;
                                       });
-                                    } else {
-                                      setState(() {
-                                        _isDisplaySendButton = false;
-                                        _textMessageController.text = value;
-                                      });
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                                    prefixIcon: GestureDetector(
-                                      onTap: toggleEmojiKeyboard,
-                                      child: Icon(
-                                          isShowEmojiKeyboard == false
-                                              ? Icons.emoji_emotions
-                                              : Icons.keyboard_outlined,
-                                          color: greyColor),
-                                    ),
-                                    suffixIcon: Padding(
-                                      padding: const EdgeInsets.only(top: 12.0),
-                                      child: Wrap(
-                                        children: [
-                                          Transform.rotate(
-                                            angle: -0.5,
-                                            child: GestureDetector(
+                                    },
+                                    controller: _textMessageController,
+                                    onChanged: (value) {
+                                      if (value.isNotEmpty) {
+                                        setState(() {
+                                          _textMessageController.text = value;
+                                          _isDisplaySendButton = true;
+                                        });
+                                      } else {
+                                        setState(() {
+                                          _isDisplaySendButton = false;
+                                          _textMessageController.text = value;
+                                        });
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                                      prefixIcon: GestureDetector(
+                                        onTap: toggleEmojiKeyboard,
+                                        child: Icon(
+                                            isShowEmojiKeyboard == false
+                                                ? Icons.emoji_emotions
+                                                : Icons.keyboard_outlined,
+                                            color: greyColor),
+                                      ),
+                                      suffixIcon: Padding(
+                                        padding: const EdgeInsets.only(top: 12.0),
+                                        child: Wrap(
+                                          children: [
+                                            Transform.rotate(
+                                              angle: -0.5,
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    _isShowAttachWindow = !_isShowAttachWindow;
+                                                  });
+                                                },
+                                                child: const Icon(
+                                                  Icons.attach_file,
+                                                  color: greyColor,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: 15,
+                                            ),
+                                            GestureDetector(
                                               onTap: () {
-                                                setState(() {
-                                                  _isShowAttachWindow = !_isShowAttachWindow;
+                                                selectImage().then((value) {
+                                                  if (_image != null) {
+                                                    WidgetsBinding.instance
+                                                        .addPostFrameCallback(
+                                                          (timeStamp) {
+                                                        showImagePickedBottomModalSheet(
+                                                            context,
+                                                            recipientName: widget
+                                                                .message
+                                                                .recipientName,
+                                                            file: _image,
+                                                            onTap: () {
+                                                              _sendImageMessage();
+                                                              Navigator.pop(
+                                                                  context);
+                                                            });
+                                                      },
+                                                    );
+                                                  }
                                                 });
                                               },
                                               child: const Icon(
-                                                Icons.attach_file,
+                                                Icons.camera_alt,
                                                 color: greyColor,
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            width: 15,
-                                          ),
-                                          GestureDetector(
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      hintText: 'Message',
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10.0),
+                              GestureDetector(
+                                onTap: () {
+                                  _sendTextMessage();
+
+                                },
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(25), color: tabColor),
+                                  child: Center(
+                                    child: Icon(
+                                      _isDisplaySendButton || _textMessageController.text.isNotEmpty ? Icons.send_outlined : _isRecording ? Icons.close : Icons.mic,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        isShowEmojiKeyboard
+                            ? SizedBox(
+                          height: 310,
+                          child: Stack(
+                            children: [
+                              EmojiPicker(
+                                config:
+                                const Config(bgColor: backgroundColor),
+                                onEmojiSelected: ((category, emoji) {
+                                  setState(() {
+                                    _textMessageController.text =
+                                        _textMessageController.text +
+                                            emoji.emoji;
+                                  });
+                                }),
+                              ),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 40,
+                                  decoration:
+                                  const BoxDecoration(color: appBarColor),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment
+                                          .spaceBetween,
+                                      children: [
+                                        const Icon(
+                                          Icons.search,
+                                          size: 20,
+                                          color: greyColor,
+                                        ),
+                                        const Row(
+                                          children: [
+                                            Icon(
+                                              Icons
+                                                  .emoji_emotions_outlined,
+                                              size: 20,
+                                              color: tabColor,
+                                            ),
+                                            SizedBox(
+                                              width: 15,
+                                            ),
+                                            Icon(
+                                              Icons.gif_box_outlined,
+                                              size: 20,
+                                              color: greyColor,
+                                            ),
+                                            SizedBox(
+                                              width: 15,
+                                            ),
+                                            Icon(
+                                              Icons.ad_units,
+                                              size: 20,
+                                              color: greyColor,
+                                            ),
+                                          ],
+                                        ),
+                                        GestureDetector(
                                             onTap: () {
-                                              selectImage().then((value) {
-                                                if (_image != null) {
-                                                  WidgetsBinding.instance
-                                                      .addPostFrameCallback(
-                                                        (timeStamp) {
-                                                      showImagePickedBottomModalSheet(
-                                                          context,
-                                                          recipientName: widget
-                                                              .message
-                                                              .recipientName,
-                                                          file: _image,
-                                                          onTap: () {
-                                                            _sendImageMessage();
-                                                            Navigator.pop(
-                                                                context);
-                                                          });
-                                                    },
-                                                  );
-                                                }
+                                              setState(() {
+                                                _textMessageController
+                                                    .text =
+                                                    _textMessageController
+                                                        .text
+                                                        .substring(
+                                                        0,
+                                                        _textMessageController
+                                                            .text
+                                                            .length - 2);
                                               });
                                             },
                                             child: const Icon(
-                                              Icons.camera_alt,
+                                              Icons.backspace_outlined,
+                                              size: 20,
                                               color: greyColor,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                        ],
-                                      ),
+                                            )),
+                                      ],
                                     ),
-                                    hintText: 'Message',
-                                    border: InputBorder.none,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 10.0),
-                            GestureDetector(
-                              onTap: () {
-                                _sendTextMessage();
-
-                              },
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(25), color: tabColor),
-                                child: Center(
-                                  child: Icon(
-                                    _isDisplaySendButton || _textMessageController.text.isNotEmpty ? Icons.send_outlined : _isRecording ? Icons.close : Icons.mic,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      isShowEmojiKeyboard
-                          ? SizedBox(
-                        height: 310,
-                        child: Stack(
-                          children: [
-                            EmojiPicker(
-                              config:
-                              const Config(bgColor: backgroundColor),
-                              onEmojiSelected: ((category, emoji) {
-                                setState(() {
-                                  _textMessageController.text =
-                                      _textMessageController.text +
-                                          emoji.emoji;
-                                });
-                              }),
-                            ),
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                width: double.infinity,
-                                height: 40,
-                                decoration:
-                                const BoxDecoration(color: appBarColor),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment
-                                        .spaceBetween,
-                                    children: [
-                                      const Icon(
-                                        Icons.search,
-                                        size: 20,
-                                        color: greyColor,
-                                      ),
-                                      const Row(
-                                        children: [
-                                          Icon(
-                                            Icons
-                                                .emoji_emotions_outlined,
-                                            size: 20,
-                                            color: tabColor,
-                                          ),
-                                          SizedBox(
-                                            width: 15,
-                                          ),
-                                          Icon(
-                                            Icons.gif_box_outlined,
-                                            size: 20,
-                                            color: greyColor,
-                                          ),
-                                          SizedBox(
-                                            width: 15,
-                                          ),
-                                          Icon(
-                                            Icons.ad_units,
-                                            size: 20,
-                                            color: greyColor,
-                                          ),
-                                        ],
-                                      ),
-                                      GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _textMessageController
-                                                  .text =
-                                                  _textMessageController
-                                                      .text
-                                                      .substring(
-                                                      0,
-                                                      _textMessageController
-                                                          .text
-                                                          .length - 2);
-                                            });
-                                          },
-                                          child: const Icon(
-                                            Icons.backspace_outlined,
-                                            size: 20,
-                                            color: greyColor,
-                                          )),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      )
-                          : const SizedBox(),
-                    ],
-                  ),
-                  _isShowAttachWindow == true
-                      ? Positioned(
-                          bottom: 65,
-                          top: 320,
-                          left: 15,
-                          right: 15,
-                          child: Container(
-                            width: double.infinity,
-                            height: MediaQuery.of(context).size.width * 0.20,
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
-                            decoration: BoxDecoration(
-                              color: bottomAttachContainerColor,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _attachWindowItem(
-                                      icon: Icons.document_scanner,
-                                      color: Colors.deepPurpleAccent,
-                                      title: "Document",
-                                    ),
-                                    _attachWindowItem(
-                                        icon: Icons.camera_alt,
-                                        color: Colors.pinkAccent,
-                                        title: "Camera",
-                                        onTap: () {}),
-                                    _attachWindowItem(icon: Icons.image, color: Colors.purpleAccent, title: "Gallery"),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _attachWindowItem(icon: Icons.headphones, color: Colors.deepOrange, title: "Audio"),
-                                    _attachWindowItem(icon: Icons.location_on, color: Colors.green, title: "Location"),
-                                    _attachWindowItem(
-                                        icon: Icons.account_circle, color: Colors.deepPurpleAccent, title: "Contact"),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _attachWindowItem(
-                                      icon: Icons.bar_chart,
-                                      color: tabColor,
-                                      title: "Poll",
-                                    ),
-                                    _attachWindowItem(
-                                        icon: Icons.gif_box_outlined,
-                                        color: Colors.indigoAccent,
-                                        title: "Gif",
-                                        onTap: () {
-                                          _sendGifMessage();
-                                        }),
-                                    _attachWindowItem(
-                                        icon: Icons.videocam_rounded,
-                                        color: Colors.lightGreen,
-                                        title: "Video",
-                                        onTap: () {
-
-                                          selectVideo().then((value) {
-                                            if (_video != null) {
-                                              WidgetsBinding.instance
-                                                  .addPostFrameCallback(
-                                                    (timeStamp) {
-                                                  showVideoPickedBottomModalSheet(
-                                                      context,
-                                                      recipientName: widget.message.recipientName,
-                                                      file: _video,
-                                                      onTap: () {
-                                                        _sendVideoMessage();
-                                                        Navigator.pop(context);
-                                                      });
-                                                },
-                                              );
-                                            }
-                                          });
-
-                                          setState(() {
-                                            _isShowAttachWindow = false;
-                                          });
-                                        }),
-                                  ],
-                                )
-                              ],
-                            ),
+                              )
+                            ],
                           ),
                         )
-                      : Container()
-                ],
+                            : const SizedBox(),
+                      ],
+                    ),
+                    _isShowAttachWindow == true
+                        ? Positioned(
+                            bottom: 65,
+                            top: 320,
+                            left: 15,
+                            right: 15,
+                            child: Container(
+                              width: double.infinity,
+                              height: MediaQuery.of(context).size.width * 0.20,
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+                              decoration: BoxDecoration(
+                                color: bottomAttachContainerColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _attachWindowItem(
+                                        icon: Icons.document_scanner,
+                                        color: Colors.deepPurpleAccent,
+                                        title: "Document",
+                                      ),
+                                      _attachWindowItem(
+                                          icon: Icons.camera_alt,
+                                          color: Colors.pinkAccent,
+                                          title: "Camera",
+                                          onTap: () {}),
+                                      _attachWindowItem(icon: Icons.image, color: Colors.purpleAccent, title: "Gallery"),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _attachWindowItem(icon: Icons.headphones, color: Colors.deepOrange, title: "Audio"),
+                                      _attachWindowItem(icon: Icons.location_on, color: Colors.green, title: "Location"),
+                                      _attachWindowItem(
+                                          icon: Icons.account_circle, color: Colors.deepPurpleAccent, title: "Contact"),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _attachWindowItem(
+                                        icon: Icons.bar_chart,
+                                        color: tabColor,
+                                        title: "Poll",
+                                      ),
+                                      _attachWindowItem(
+                                          icon: Icons.gif_box_outlined,
+                                          color: Colors.indigoAccent,
+                                          title: "Gif",
+                                          onTap: () {
+                                            _sendGifMessage();
+                                          }),
+                                      _attachWindowItem(
+                                          icon: Icons.videocam_rounded,
+                                          color: Colors.lightGreen,
+                                          title: "Video",
+                                          onTap: () {
+
+                                            selectVideo().then((value) {
+                                              if (_video != null) {
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback(
+                                                      (timeStamp) {
+                                                    showVideoPickedBottomModalSheet(
+                                                        context,
+                                                        recipientName: widget.message.recipientName,
+                                                        file: _video,
+                                                        onTap: () {
+                                                          _sendVideoMessage();
+                                                          Navigator.pop(context);
+                                                        });
+                                                  },
+                                                );
+                                              }
+                                            });
+
+                                            setState(() {
+                                              _isShowAttachWindow = false;
+                                            });
+                                          }),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        : Container()
+                  ],
+                ),
+              );
+            }
+            return const Center(
+              child: CircularProgressIndicator(
+                color: tabColor,
               ),
             );
-          }
-          return const Center(
-            child: CircularProgressIndicator(
-              color: tabColor,
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }

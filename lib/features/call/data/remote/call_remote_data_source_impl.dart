@@ -142,4 +142,22 @@ class CallRemoteDataSourceImpl implements CallRemoteDataSource {
 
 
   }
+
+  @override
+  Future<void> updateCallHistoryStatus(CallEntity call) async {
+    final myHistoryCollection = fireStore.collection(FirebaseCollectionConst.users).doc(call.callerId).collection(FirebaseCollectionConst.callHistory);
+    final otherHistoryCollection = fireStore.collection(FirebaseCollectionConst.users).doc(call.receiverId).collection(FirebaseCollectionConst.callHistory);
+
+    Map<String, dynamic> myHistoryInfo = {};
+    Map<String, dynamic> otherHistoryInfo = {};
+
+    if(call.isCallDialed != null) myHistoryInfo['isCallDialed'] = call.isCallDialed;
+    if(call.isMissed != null) myHistoryInfo['isMissed'] = call.isMissed;
+
+    if(call.isCallDialed != null) otherHistoryInfo['isCallDialed'] = call.isCallDialed;
+    if(call.isMissed != null) otherHistoryInfo['isMissed'] = call.isMissed;
+
+    myHistoryCollection.doc(call.callId).update(myHistoryInfo);
+    otherHistoryCollection.doc(call.callId).update(otherHistoryInfo);
+  }
 }

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:whatsapp_clone_app/features/app/const/page_const.dart';
 import 'package:whatsapp_clone_app/features/app/home/contacts_page.dart';
 import 'package:whatsapp_clone_app/features/app/settings/settings_page.dart';
+import 'package:whatsapp_clone_app/features/call/domain/entities/call_entity.dart';
 import 'package:whatsapp_clone_app/features/call/presentation/pages/call_contacts_page.dart';
+import 'package:whatsapp_clone_app/features/call/presentation/pages/call_page.dart';
 import 'package:whatsapp_clone_app/features/chat/domain/entities/message_entity.dart';
 import 'package:whatsapp_clone_app/features/chat/presentation/pages/single_chat_page.dart';
 import 'package:whatsapp_clone_app/features/status/domain/entities/status_entity.dart';
@@ -51,6 +53,13 @@ class OnGenerateRoute {
       case PageConst.myStatusPage: {
         if(args is StatusEntity) {
           return materialPageBuilder( MyStatusPage(status: args));
+        } else {
+          return materialPageBuilder( const ErrorPage());
+        }
+      }
+      case PageConst.callPage: {
+        if(args is CallEntity) {
+          return materialPageBuilder( CallPage(callEntity: args));
         } else {
           return materialPageBuilder( const ErrorPage());
         }
