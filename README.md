@@ -5,7 +5,7 @@ This **WhatsApp Clone** is from the ongoing Flutter & Firebase Developer Bootcam
 
 <h2>🏠 Application Architecture</h2>
 
-As cleared from the main title, this app uses **Clean Architecture** to separate app's modules into independent layers to achieve maintainability, scalibility and testability. The Clean Architecture pattern followed in this app is of Uncle Bob AKA Robert C. Martin.
+As cleared from the main title, this app uses **Clean Architecture** to separate app's modules into independent layers to achieve maintainability, scalibility and testability. The Clean Architecture pattern followed in this app is of Robert C. Martin AKA Uncle Bob.
 
 <h2>🦾 App Features</h2>
 
