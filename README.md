@@ -1,7 +1,7 @@
 
 # Flutter WhatsApp Clone Clean Architecture
 
-This **WhatsApp Clone** is from the ongoing Flutter & Firebase Developer Bootcamp on YouTube. This App is currently underdevelopment on YouTube.
+This **WhatsApp Clone** is from the ongoing Flutter & Firebase Developer Bootcamp on YouTube.
 
 <h2>🏠 Application Architecture</h2>
 
