@@ -24,8 +24,8 @@ import 'package:whatsapp_clone_app/features/user/presentation/cubit/get_single_u
 import 'package:whatsapp_clone_app/main_injection_container.dart' as di;
 import 'package:whatsapp_clone_app/storage/storage_provider.dart';
 class StatusPage extends StatefulWidget {
-  final String uid;
-  const StatusPage({super.key, required this.uid});
+  final UserEntity currentUser;
+  const StatusPage({super.key, required this.currentUser});
 
   @override
   State<StatusPage> createState() => _StatusPageState();
@@ -85,17 +85,19 @@ class _StatusPageState extends State<StatusPage> {
     super.initState();
 
     BlocProvider.of<StatusCubit>(context).getStatuses(status: StatusEntity());
-    BlocProvider.of<GetSingleUserCubit>(context).getSingleUser(uid: widget.uid);
 
     BlocProvider.of<GetMyStatusCubit>(context).getMyStatus(
-        uid: widget.uid);
+        uid: widget.currentUser.uid!);
 
-    di.sl<GetMyStatusFutureUseCase>()
-        .call(widget.uid).then((myStatus) {
-      if (myStatus.isNotEmpty && myStatus.first.stories != null) {
-        _fillMyStoriesList(myStatus.first);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      di.sl<GetMyStatusFutureUseCase>()
+          .call(widget.currentUser.uid!).then((myStatus) {
+        if (myStatus.isNotEmpty && myStatus.first.stories != null) {
+          _fillMyStoriesList(myStatus.first);
+        }
+      });
     });
+
 
 
   }
@@ -117,33 +119,18 @@ class _StatusPageState extends State<StatusPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GetSingleUserCubit, GetSingleUserState>(
+    print("build");
+    return  BlocBuilder<StatusCubit, StatusState>(
       builder: (context, state) {
-        if (state is GetSingleUserLoaded) {
-          final currentUser = state.singleUser;
-          return BlocBuilder<StatusCubit, StatusState>(
+        if (state is StatusLoaded) {
+          final statuses = state.statuses.where((element) => element.uid != widget.currentUser.uid).toList();
+          print("statuses loaded $statuses");
+
+          return BlocBuilder<GetMyStatusCubit, GetMyStatusState>(
             builder: (context, state) {
-              if (state is StatusLoaded) {
-                final statuses = state.statuses.where((element) => element.uid != widget.uid).toList();
-
-                if(_stories.isEmpty) {
-                  return _bodyWidget(statuses, currentUser);
-                } else {
-                  return BlocBuilder<GetMyStatusCubit, GetMyStatusState>(
-                    builder: (context, state) {
-                      if(state is GetMyStatusLoaded) {
-                        return _bodyWidget(statuses, currentUser, myStatus: state.myStatus);
-                      }
-
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: tabColor,
-                        ),
-                      );
-                      },
-                  );
-                }
-
+              if(state is GetMyStatusLoaded) {
+                print("loaded my status ${state.myStatus}");
+                return _bodyWidget(statuses, widget.currentUser, myStatus: state.myStatus);
               }
 
               return const Center(
@@ -153,15 +140,17 @@ class _StatusPageState extends State<StatusPage> {
               );
             },
           );
+
         }
+
         return const Center(
           child: CircularProgressIndicator(
             color: tabColor,
           ),
         );
-
       },
     );
+    ;
   }
   _bodyWidget(List<StatusEntity> statuses, UserEntity currentUser, {StatusEntity? myStatus}) {
     return Scaffold(
@@ -188,7 +177,7 @@ class _StatusPageState extends State<StatusPage> {
                                 numberOfStories: myStatus.stories!.length,
                                 spaceLength: 4,
                                 images: myStatus.stories!,
-                                uid: widget.uid
+                                uid: widget.currentUser.uid
                             ),
                             child: Container(
                               margin: const EdgeInsets.all(3),
@@ -322,7 +311,7 @@ class _StatusPageState extends State<StatusPage> {
                               numberOfStories: status.stories!.length,
                               spaceLength: 4,
                               images: status.stories,
-                              uid: widget.uid
+                              uid: widget.currentUser.uid
                           ),
                           child: Container(
                             margin: const EdgeInsets.all(3),
@@ -365,7 +354,7 @@ class _StatusPageState extends State<StatusPage> {
           caption: "This is very beautiful photo",
           onPageChanged: (index) {
             BlocProvider.of<StatusCubit>(context)
-                .seenStatusUpdate(imageIndex: index, userId: widget.uid, statusId: status.statusId!);
+                .seenStatusUpdate(imageIndex: index, userId: widget.currentUser.uid!, statusId: status.statusId!);
           },
           createdAt: status!.createdAt!.toDate(),
         );
@@ -386,7 +375,7 @@ class _StatusPageState extends State<StatusPage> {
         ));
       }
 
-      di.sl<GetMyStatusFutureUseCase>().call(widget.uid).then((myStatus) {
+      di.sl<GetMyStatusFutureUseCase>().call(widget.currentUser.uid!).then((myStatus) {
         if (myStatus.isNotEmpty) {
           BlocProvider.of<StatusCubit>(context)
               .updateOnlyImageStatus(status: StatusEntity(statusId: myStatus.first.statusId, stories: _stories))
@@ -395,7 +384,7 @@ class _StatusPageState extends State<StatusPage> {
                 context,
                 MaterialPageRoute(
                     builder: (_) => HomePage(
-                      uid: widget.uid,
+                      uid: widget.currentUser.uid!,
                       index: 1,
                     )));
           });
@@ -417,7 +406,7 @@ class _StatusPageState extends State<StatusPage> {
                 context,
                 MaterialPageRoute(
                     builder: (_) => HomePage(
-                      uid: widget.uid,
+                      uid: widget.currentUser.uid!,
                       index: 1,
                     )));
           });

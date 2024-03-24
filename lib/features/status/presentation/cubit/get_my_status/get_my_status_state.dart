@@ -16,11 +16,11 @@ class GetMyStatusLoading extends GetMyStatusState {
 
 
 class GetMyStatusLoaded extends GetMyStatusState {
-  final StatusEntity myStatus;
+  final StatusEntity? myStatus;
 
-  const GetMyStatusLoaded({required this.myStatus});
+  const GetMyStatusLoaded({this.myStatus});
   @override
-  List<Object> get props => [myStatus];
+  List<Object?> get props => [myStatus];
 }
 
 

@@ -235,7 +235,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
               children: [
                 ChatPage(uid: widget.uid),
-                StatusPage(uid: widget.uid),
+                StatusPage(currentUser: currentUser),
                 CallHistoryPage(currentUser: currentUser,),
               ],
             ),

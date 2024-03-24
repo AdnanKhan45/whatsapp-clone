@@ -22,7 +22,7 @@ class GetMyStatusCubit extends Cubit<GetMyStatusState> {
       streamResponse.listen((statuses) {
         print("Mystatuses = $statuses");
         if(statuses.isEmpty) {
-          emit(GetMyStatusLoaded(myStatus: StatusEntity()));
+          emit(const GetMyStatusLoaded(myStatus: null));
         } else {
           emit(GetMyStatusLoaded(myStatus: statuses.first));
 
